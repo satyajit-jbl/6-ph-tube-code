@@ -8,6 +8,16 @@ function getTimeString(time){
     remainingSecond = remainingSecond % 60;
     return `${hour} hour ${minute} minute ${remainingSecond} second ago`;
 }
+
+const removeActiveClass=()=> {
+    const buttons = document.getElementsByClassName("category-btn");
+    console.log(buttons);
+    for(let btn of buttons){
+        btn.classList.remove("active")
+    }
+    // console.log('html collection')
+}
+
 //1 - Fetch, Load and show categories on html
 // create loadCatagories
 const loadCatagories = () => {
@@ -24,6 +34,24 @@ const loadVideos = () => {
      .then((data) => displayVideos(data.videos))
      .catch((error) => console.log(error))
 };
+
+const loadCategoryVideos = (id) => {
+    // alert(id);
+    //fetch the data
+    fetch(`https://openapi.programming-hero.com/api/phero-tube/category/${id}`)
+    .then ((res) => res.json())
+    .then((data) => {
+        //sobaike active class remove koro
+        removeActiveClass()
+
+        //id er class k active korao
+        const activeBtn = document.getElementById(`btn-${id}`);
+        activeBtn.classList.add("active")
+        console.log(activeBtn);
+        displayVideos(data.category)
+    })
+    .catch((error) => console.log(error))
+}
 
 // const cardDeme ={
 //     "category_id": "1001",
@@ -46,6 +74,25 @@ const loadVideos = () => {
 
 const displayVideos = (videos) => {
     const videoContainer = document.getElementById('videos');
+    videoContainer.innerHTML = "";
+
+    if(videos.length == 0){
+        videoContainer.classList.remove("grid");
+        videoContainer.innerHTML=`
+        <div class="min-h-[300px] w-full flex flex-col gap-5 justify-center items-center">
+        <img src="assets/icon.png" />
+        <h2 class="text-center text-xl font-bold"> 
+        No Content here in this category
+        </h2>
+        </div>
+
+        `;
+        return;
+    } else{
+        videoContainer.classList.add("grid");
+    }
+   
+
     videos.forEach(video => {
         console.log(video);
         const card = document.createElement('div');
@@ -97,12 +144,19 @@ const displayCategories = (categories) => {
         console.log(item);
         //create a button
 
-        const button = document.createElement('button');
-        button.classList = "btn";
-        button.innerText = item.category;
+        // const button = document.createElement('button');
+        // button.classList = "btn";
+        // button.innerText = item.category;
+
+        const buttonContainer = document.createElement('div');
+        buttonContainer.innerHTML = 
+        `
+        <button id="btn-${item.category_id}" onclick="loadCategoryVideos(${item.category_id})" class="btn category-btn">${item.category}</button>
+        `
+        
 
         //add button to category container
-        categoryContainer.append(button);
+        categoryContainer.append(buttonContainer);
     });
     
 };
